@@ -25,9 +25,11 @@ from deap import creator
 from deap import tools
 from deap import gp
 
+fold_k = 10
+current_k = 0
+folds = []
 
 all_data = []
-
 f = open('Dataset/pima-indians-diabetes/pima-indians-diabetes.data', 'r')
 for line in f:
     tmp = line.strip('\n').split(',')
@@ -38,29 +40,34 @@ for line in f:
 
 f.close()
 
-train_percent = 0.4#0.5 # 0.4-0.5
-test_percent = 0.6 #0.6-0.5
+
+def splitData(all_data, fold_k):
+    train_percent = 0.4#0.5 # 0.4-0.5
+    test_percent = 0.6 #0.6-0.5
 
 
-shuffle(all_data)
+    shuffle(all_data)
 
-train_data = all_data[:int(len(all_data)*train_percent)]
-test_data = all_data[int(len(all_data)*train_percent):]
+    train_data = all_data[:int(len(all_data)*train_percent)]
+    test_data = all_data[int(len(all_data)*train_percent):]
 
-fold_k = 10
-current_k = 0
-folds = []
+    folds = []
 
-num_per_fold = int(len(train_data)/fold_k)
+    num_per_fold = int(len(train_data)/fold_k)
+    for i in range(fold_k-1):
+        folds.append(train_data[i*num_per_fold:(i+1)*num_per_fold])
 
-for i in range(fold_k-1):
-    folds.append(train_data[i*num_per_fold:(i+1)*num_per_fold])
+    folds.append(train_data[(fold_k-1)*num_per_fold:])
 
-folds.append(train_data[(fold_k-1)*num_per_fold:])
+    num_in_test = sum(len(fold) for fold in folds)
+    print ("Num Folds: " + str(fold_k) + "\t Num per fold: " + str(num_per_fold))
+    print ("Length of Original: " + str(len(train_data)) + "\t Length of Folds: " + str(num_in_test))
 
-num_in_test = sum(len(fold) for fold in folds)
-print ("Num Folds: " + str(fold_k) + "\t Num per fold: " + str(num_per_fold))
-print ("Length of Original: " + str(len(train_data)) + "\t Length of Folds: " + str(num_in_test))
+    return folds, test_data
+
+
+
+
 
 
 
@@ -127,8 +134,8 @@ def det2x2(n11, n12, n21, n22):
     return (n11*n22-n12*n21)
 
 
-test_num = 6;
-name = "Mut-Experiment-" + str(test_num)
+test_num = 1;
+name = "Test" + str(test_num)
 
 
 
@@ -198,6 +205,7 @@ def evalFunc(individual, current_k, fold_k, folds):
         if (i == current_k):
             continue
 
+#        print ("Folds length: " + str(len(folds)))
         for test in folds[i]:
 #            print("Test " + str(test))
 #            print("Test " + str(test[:8]))
@@ -214,7 +222,7 @@ def evalFunc(individual, current_k, fold_k, folds):
 #        print ("test: " + str(test[:8]) + "\tRes: " + str(test[8])) for fold in folds[i] for test in fold
     return total, #/(len(train_data)-len(folds[current_k-1]))
 
-def testEval(individual):
+def testEval(individual, test_data):
     func = toolbox.compile(expr=individual)
     total = 0
     for test in test_data:
@@ -250,18 +258,21 @@ mstats.register("max", np.max)
 f_avg = open('Logs/'+name+'-avg.txt', 'w')
 avg_vals = []
 for i in range(20):
+    folds, test_data = splitData(all_data, fold_k)
+    toolbox.register("evaluate", evalFunc, current_k=current_k, fold_k=fold_k, folds=folds)
+
     pop = toolbox.population(n=1000)
     # holds the n best individuals
     hof = tools.HallOfFame(1)
     print ("Run: " + str(i))
-    pop, logs = algorithms.eaSimple(pop, toolbox, 0.1, 0.9, 60, stats=mstats, halloffame=hof, verbose=True)
+    pop, logs = algorithms.eaSimple(pop, toolbox, 0.9, 0.1, 60, stats=mstats, halloffame=hof, verbose=True)
     f = open('Logs/'+name+'-logs-' + str(i) +'.txt', 'w')
     f.write(str(logs))
     f.close()
     #pop2, logs2 = algorithms.eaSimple(pop, toolbox, 0.05, 0.50, 60, stats=mstats, halloffame=hof, verbose=True)
     expr = hof[0]
-    print("fitness: " + str(testEval(expr)))
-    avg_vals.append(testEval(expr))
+    print("fitness: " + str(testEval(expr, test_data)))
+    avg_vals.append(testEval(expr, test_data))
     #f_avg.write(str(testEval(expr)) + "\n")
 
 f_avg.write("Runs Average: "+str(np.mean(avg_vals))+"\n\n")
