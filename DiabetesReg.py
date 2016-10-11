@@ -134,8 +134,8 @@ def det2x2(n11, n12, n21, n22):
     return (n11*n22-n12*n21)
 
 
-test_num = 1;
-name = "Test" + str(test_num)
+test_num = 6;
+name = "Experiment-" + str(test_num)
 
 
 
