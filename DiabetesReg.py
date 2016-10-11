@@ -127,10 +127,11 @@ def det2x2(n11, n12, n21, n22):
     return (n11*n22-n12*n21)
 
 
-name = "test4"
+test_num = 6;
+name = "Mut-Experiment-" + str(test_num)
 
 
-test_num = 1;
+
 
 
 pset = gp.PrimitiveSet("MAIN", 8)
@@ -155,7 +156,8 @@ if (test_num > 4):
     pset.addPrimitive(round, 1)
 #pset.addPrimitive(modulo, 2)
 #pset.addPrimitive(dist,4)
-#pset.addPrimitive(ifStatement,3)
+if (test_num > 5):
+    pset.addPrimitive(ifStatement,3)
 #pset.addPrimitive(compStatement,4)
 #pset.addPrimitive(det2x2,4)
 if (test_num > 2):
@@ -247,12 +249,12 @@ mstats.register("max", np.max)
 
 f_avg = open('Logs/'+name+'-avg.txt', 'w')
 avg_vals = []
-for i in range(5):
+for i in range(20):
     pop = toolbox.population(n=1000)
     # holds the n best individuals
     hof = tools.HallOfFame(1)
     print ("Run: " + str(i))
-    pop, logs = algorithms.eaSimple(pop, toolbox, 0.9, 0.1, 60, stats=mstats, halloffame=hof, verbose=True)
+    pop, logs = algorithms.eaSimple(pop, toolbox, 0.1, 0.9, 60, stats=mstats, halloffame=hof, verbose=True)
     f = open('Logs/'+name+'-logs-' + str(i) +'.txt', 'w')
     f.write(str(logs))
     f.close()
