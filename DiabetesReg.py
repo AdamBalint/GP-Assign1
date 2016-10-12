@@ -134,8 +134,8 @@ def det2x2(n11, n12, n21, n22):
     return (n11*n22-n12*n21)
 
 
-test_num = 6;
-name = "Experiment-" + str(test_num)
+test_num = 2;
+name = "Mut-Experiment-" + str(test_num)
 
 
 
@@ -265,7 +265,7 @@ for i in range(20):
     # holds the n best individuals
     hof = tools.HallOfFame(1)
     print ("Run: " + str(i))
-    pop, logs = algorithms.eaSimple(pop, toolbox, 0.9, 0.1, 60, stats=mstats, halloffame=hof, verbose=True)
+    pop, logs = algorithms.eaSimple(pop, toolbox, 0.1, 0.9, 60, stats=mstats, halloffame=hof, verbose=True)
     f = open('Logs/'+name+'-logs-' + str(i) +'.txt', 'w')
     f.write(str(logs))
     f.close()
