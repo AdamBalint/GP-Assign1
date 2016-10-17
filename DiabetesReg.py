@@ -286,3 +286,7 @@ for i in range(1):
 # write results to the file
 f_avg.write(str("\n".join(str(s) for s in avg_vals)))
 f_avg.close()
+
+# Example for how to graph
+#nodes, edges, labels = gp.graph(expr)
+#gpg.graph(nodes, edges, labels)
