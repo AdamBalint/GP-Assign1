@@ -6,8 +6,8 @@ l = None
 g = nx.Graph();
 pos = graphviz_layout(g, prog="neato")
 
+# Graphs the program tree
 def graph(nodes, edges, labels):
-#    print(str(nodes) + "\n"+ str(edges) + "\n" + str(labels))
     g = nx.Graph();
     g.add_nodes_from(nodes)
     g.add_edges_from(edges)
